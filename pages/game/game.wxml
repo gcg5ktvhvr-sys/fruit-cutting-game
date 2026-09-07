@@ -1,0 +1,113 @@
+<!--游戏主页面-->
+<view class="game-container" style="width: {{screenWidth}}px; height: {{screenHeight}}px;">
+  <!-- 背景层 -->
+  <view class="game-bg" style="transform: {{debuffState === '屏幕倒置+左右反转' ? 'rotate(180deg) scaleX(-1)' : ''}}; background: {{debuffState === '屏幕覆盖红色雾霾' ? 'rgba(255, 0, 0, 0.3)' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}">
+  </view>
+
+  <!-- 游戏状态栏 -->
+  <view class="game-header">
+    <view class="header-item">
+      <text class="label">波次</text>
+      <text class="value">{{wave}}</text>
+    </view>
+    <view class="header-item">
+      <text class="label">得分</text>
+      <text class="value" style="color: #ffd700;">{{score}}</text>
+    </view>
+    <view class="header-item">
+      <text class="label">失误</text>
+      <text class="value" style="color: {{missCount >= 2 ? '#ff6b6b' : '#4ade80'}};">{{missCount}}/3</text>
+    </view>
+  </view>
+
+  <!-- 血条系统 -->
+  <view class="blood-container">
+    <view class="blood-label">生命值</view>
+    <view class="blood-bar">
+      <view class="blood-fill" style="width: {{(blood / maxBlood) * 100}}%; background: {{blood <= 1 ? '#ff6b6b' : blood <= 2 ? '#fbbf24' : '#4ade80'}};">
+      </view>
+    </view>
+    <text class="blood-text">{{blood}}/{{maxBlood}}</text>
+  </view>
+
+  <!-- 游戏区域 -->
+  <view class="game-arena" id="gameArena" style="width: {{screenWidth}}px;">
+    <!-- 水果容器 -->
+    <view class="fruits-container">
+      <view wx:for="{{fruits}}" wx:key="id" class="fruit-item" 
+            id="fruit-{{item.id}}"
+            style="left: {{item.displayX}}px; top: {{item.displayY}}px; background-color: {{item.color}}; opacity: {{item.opacity}};" 
+            data-fruit-id="{{item.id}}">
+        <text class="fruit-name">{{item.name}}</text>
+      </view>
+    </view>
+
+    <!-- 判定结果飘字 -->
+    <view wx:for="{{judgementTexts}}" wx:key="id" class="judgement-text" 
+          style="left: {{item.x}}px; top: {{item.y}}px; color: {{item.color}}; opacity: {{item.opacity}};">
+      {{item.text}}
+    </view>
+
+    <!-- 触摸区域（全屏可触摸） -->
+    <view class="touch-zone" 
+          catchtouchstart="handleTouchStart"
+          catchtouchmove="handleTouchMove"
+          catchtouchend="handleTouchEnd"
+          style="width: {{screenWidth}}px; height: {{screenHeight - 300}}px;">
+    </view>
+  </view>
+
+  <!-- 底部控制栏 -->
+  <view class="bottom-controls">
+    <view wx:if="{{!gameStarted}}" class="control-btn start-btn" bindtap="startGame">
+      <text>开始游戏</text>
+    </view>
+    <view wx:if="{{gameStarted && !gameOver}}" class="control-btn pause-btn" bindtap="togglePause">
+      <text>{{gamePaused ? '继续' : '暂停'}}</text>
+    </view>
+    <view wx:if="{{gameOver}}" class="control-btn restart-btn" bindtap="restartGame">
+      <text>重新开始</text>
+    </view>
+    <view class="control-btn stats-btn" bindtap="showStats">
+      <text>战绩</text>
+    </view>
+  </view>
+
+  <!-- 游戏结束弹窗 -->
+  <view wx:if="{{gameOver}}" class="game-over-modal">
+    <view class="modal-content">
+      <view class="modal-title">游戏结束</view>
+      <view class="modal-stats">
+        <view class="stat-row">
+          <text class="stat-label">最终波次:</text>
+          <text class="stat-value">{{wave}}</text>
+        </view>
+        <view class="stat-row">
+          <text class="stat-label">总得分:</text>
+          <text class="stat-value" style="color: #ffd700;">{{score}}</text>
+        </view>
+        <view class="stat-row">
+          <text class="stat-label">完美率:</text>
+          <text class="stat-value">{{perfectRate}}%</text>
+        </view>
+        <view class="stat-row">
+          <text class="stat-label">平均力度:</text>
+          <text class="stat-value">{{avgForce}}</text>
+        </view>
+        <view class="stat-row">
+          <text class="stat-label">手指评级:</text>
+          <text class="stat-value" style="color: #ff6b6b;">{{handGrade}}</text>
+        </view>
+      </view>
+      <view class="modal-buttons">
+        <view class="modal-btn primary" bindtap="restartGame">再来一次</view>
+        <view class="modal-btn secondary" bindtap="shareScore">分享战绩</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 暂停遮罩 -->
+  <view wx:if="{{gamePaused && gameStarted}}" class="pause-overlay">
+    <view class="pause-text">游戏暂停</view>
+  </view>
+</view>
